@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food trucks in San Francisco</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Include the Papaparse library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+
+    <center>
+        <br><br>
+    <h1>Food trucks in San Francisco</h1>
+    <input type="text" id="searchInput" placeholder="Enter search term">
+    <select id="searchField">
+        <option value="locationid">Location ID</option>
+        <option value="Applicant">Applicant</option>
+        <option value="FacilityType">Facility Type</option>
+        <option value="cnn">CNN</option>
+        <option value="LocationDescription">Location Description</option>
+        <option value="Address">Address</option>
+        <option value="blocklot">Block Lot</option>
+        <option value="block">Block</option>
+        <option value="lot">Lot</option>
+        <option value="permit">Permit</option>
+        <option value="Status">Status</option>
+        <option value="FoodItems">Food Items</option>
+        <option value="X">X Coordinate</option>
+        <option value="Y">Y Coordinate</option>
+        <option value="Latitude">Latitude</option>
+        <option value="Longitude">Longitude</option>
+        <option value="Schedule">Schedule</option>
+        <option value="NOISent">NOI Sent</option>
+        <option value="Approved">Approved</option>
+        <option value="Received">Received</option>
+        <option value="PriorPermit">Prior Permit</option>
+        <option value="ExpirationDate">Expiration Date</option>
+        <option value="Location">Location</option>
+    </select>
+    <button  id="searchButton">Search</button>
+   </center>
+    <table>
+        <thead>
+            <tr id="tableHeaders">
+                <!-- Table headers will be dynamically added here based on the selected search field -->
+            </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+    </table>
+<!-- Include the Papaparse library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script>
+    let searchData = []; // To store the parsed CSV data
+
+    // Fetch and parse the CSV data
+    Papa.parse('Mobile_Food_Permit_Map.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        complete: function (results) {
+            searchData = results.data;
+            updateTable(searchData); // Initialize the table with all data
+        }
+    });
+
+    const searchInput = document.getElementById("searchInput");
+    const searchField = document.getElementById("searchField");
+    const searchButton = document.getElementById("searchButton");
+    const dataBody = document.getElementById("dataBody");
+    const tableHeaders = document.getElementById("tableHeaders");
+
+    searchButton.addEventListener("click", () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedField = searchField.value;
+
+        const filteredData = searchData.filter(row =>
+            row[selectedField] && row[selectedField].toString().toLowerCase().includes(searchTerm)
+        );
+        
+        updateTable(filteredData);
+    });
+
+    function updateTable(data) {
+        dataBody.innerHTML = "";
+        
+        if (data.length === 0) {
+            const noDataRow = document.createElement("tr");
+            noDataRow.innerHTML = `<td colspan="100%">No matching data found</td>`;
+            dataBody.appendChild(noDataRow);
+            return;
+        }
+
+        // Create table headers based on the selected field
+        const headers = Object.keys(data[0]);
+        tableHeaders.innerHTML = "";
+        headers.forEach(header => {
+            const headerCell = document.createElement("th");
+            headerCell.textContent = header;
+            tableHeaders.appendChild(headerCell);
+        });
+
+        data.forEach(row => {
+            const rowElement = document.createElement("tr");
+            headers.forEach(header => {
+                const cell = document.createElement("td");
+                cell.textContent = row[header];
+                rowElement.appendChild(cell);
+            });
+            dataBody.appendChild(rowElement);
+        });
+    }
+</script>
+
+
+</body>
+</html>
